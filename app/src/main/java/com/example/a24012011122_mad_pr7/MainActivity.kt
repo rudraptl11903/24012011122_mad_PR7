@@ -4,122 +4,82 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
+import com.example.a24012011122_mad_pr7.databinding.ActivityMainBinding
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.json.JSONArray
-import org.json.JSONObject
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var recyclerView: RecyclerView
-    private lateinit var databaseHelper: ContactDatabaseHelper
-    private lateinit var contactAdapter: ContactAdapter
-    private lateinit var contactList: ArrayList<Contact>
+    private lateinit var binding: ActivityMainBinding
+    private lateinit var db: DatabaseHelper
+    private lateinit var adapter: PersonAdapter
+    private val persons = ArrayList<Person>()
+
+    private val apiUrl = "https://api.json-generator.com/templates/5rDXHcbgpo93/data"
+    private val apiToken = "d7wrtfqywyhu7y2bcbsz3cgjpbfisuhnmbibvgvf"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        setContentView(R.layout.activity_main)
+        db = DatabaseHelper(this)
+        adapter = PersonAdapter(persons) { person -> db.deletePerson(person) }
+        binding.recyclerView.layoutManager = LinearLayoutManager(this)
+        binding.recyclerView.adapter = adapter
 
-        recyclerView = findViewById(R.id.recycle1)
+        binding.fabRefresh.setOnClickListener { fetchPersons() }
 
-        databaseHelper = ContactDatabaseHelper(this)
-
-        addSampleData()
-
-        contactList = databaseHelper.getAllContacts()
-
-        contactAdapter = ContactAdapter(contactList) { contact ->
-            deleteContact(contact)
-        }
-
-        recyclerView.layoutManager = LinearLayoutManager(this)
-        recyclerView.adapter = contactAdapter
+        if (db.personsCount == 0) fetchPersons() else showPersons()
     }
 
-    private fun addSampleData() {
-
-        val existingContacts = databaseHelper.getAllContacts()
-
-
-        if (existingContacts.isEmpty()) {
-
-            databaseHelper.addContact(
-                Contact(
-                    name = "Rahul Sharma",
-                    phoneNo = "9876543210",
-                    emailId = "rahul@gmail.com",
-                    address = "Ahmedabad",
-                    latitude = 23.0225,
-                    longitude = 72.5714
-                )
-            )
-
-            databaseHelper.addContact(
-                Contact(
-                    name = "Priya Patel",
-                    phoneNo = "9123456780",
-                    emailId = "priya@gmail.com",
-                    address = "Surat",
-                    latitude = 21.1702,
-                    longitude = 72.8311
-                )
-            )
-
-            databaseHelper.addContact(
-                Contact(
-                    name = "Amit Shah",
-                    phoneNo = "9988776655",
-                    emailId = "amit@gmail.com",
-                    address = "Vadodara",
-                    latitude = 22.3072,
-                    longitude = 73.1812
-                )
-            )
-        }
+    private fun showPersons() {
+        persons.clear()
+        persons.addAll(db.allPersons)
+        adapter.notifyDataSetChanged()
     }
 
-    private fun getPersonDetailsFromJson(sJson : String?){
-        val size = personList.size
-        personList.clear()
-        personRecycleAdepter.notifyItemRangeRangeReoved(0,size)
-        try {
-            val jsonArray = JSONArray(s.json)
-            for(i in 0 = until < jsonArray.leangth()){
-                val jsonObject = jsonArray[i] as JSONObject
-                val person = Person(jsonObject)
-                personList.add(person)
-                try {
-                    if (db.getPerson(person.id) != null)
-                        db.updatePerson(person)
-                    else
-                        db.inserPerson(person)
-                }catch (e: Exception){
-                    e.printStackTrace()
+    private fun fetchPersons() {
+        CoroutineScope(Dispatchers.IO).launch {
+            val data = HttpRequest().makeServiceCall(apiUrl, apiToken)
+            val list = if (data != null) parsePersons(data) else null
+            if (list != null) {
+                db.deleteAll()
+                list.forEach { db.insertPerson(it) }
+            }
+            withContext(Dispatchers.Main) {
+                if (list == null) {
+                    Toast.makeText(this@MainActivity, "Failed to load data", Toast.LENGTH_SHORT).show()
+                } else {
+                    showPersons()
                 }
             }
         }
     }
-    private fun deleteContact(contact: Contact) {
 
-        val result = databaseHelper.deleteContact(contact.id)
-
-        if (result > 0) {
-
-            contactAdapter.removeContact(contact)
-
-            Toast.makeText(
-                this,
-                "Contact deleted",
-                Toast.LENGTH_SHORT
-            ).show()
-
-        } else {
-
-            Toast.makeText(
-                this,
-                "Unable to delete contact",
-                Toast.LENGTH_SHORT
-            ).show()
+    private fun parsePersons(json: String): ArrayList<Person>? {
+        return try {
+            val array = JSONArray(json)
+            val list = ArrayList<Person>()
+            for (i in 0 until array.length()) {
+                val obj = array.getJSONObject(i)
+                val profile = obj.getJSONObject("profile")
+                list.add(
+                    Person(
+                        obj.getString("id"),
+                        profile.getString("name"),
+                        obj.getString("email"),
+                        obj.getString("phone").replace("}", "").trim(),
+                        profile.getString("address")
+                    )
+                )
+            }
+            list
+        } catch (e: Exception) {
+            null
         }
     }
 }
