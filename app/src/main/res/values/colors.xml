@@ -2,4 +2,14 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <!-- Light Theme Colors -->
+    <color name="screen_background">#F8F9FA</color>
+    <color name="card_background">#EAEFF7</color>
+    <color name="text_primary">#202124</color>
+    <color name="text_secondary">#5F6368</color>
+    <color name="avatar_background">#8B8B8B</color>
+    <color name="delete_button_bg">#FC1E61</color>
+    <color name="fab_background">#D2E3FC</color>
+    <color name="fab_icon_tint">#1E2A4B</color>
 </resources>

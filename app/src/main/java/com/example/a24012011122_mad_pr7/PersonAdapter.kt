@@ -2,8 +2,10 @@ package com.example.a24012011122_mad_pr7
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.example.a24012011122_mad_pr7.databinding.ItemPersonBinding
+import java.io.Serializable
 
 class PersonAdapter(
     private val persons: ArrayList<Person>,
@@ -34,6 +36,15 @@ class PersonAdapter(
                     persons.removeAt(pos)
                     notifyItemRemoved(pos)
                 }
+            }
+
+            root.setOnClickListener {
+                val obj: Serializable = person
+                Toast.makeText(
+                    root.context,
+                    "${person.name}\nLat: ${person.latitude}, Long: ${person.longitude}",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         }
     }

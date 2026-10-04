@@ -11,7 +11,7 @@ class DatabaseHelper(context: Context?) :
     SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
 
     companion object {
-        private const val DATABASE_VERSION = 1
+        private const val DATABASE_VERSION = 2
         private const val DATABASE_NAME = "persons_db"
     }
 
@@ -38,6 +38,8 @@ class DatabaseHelper(context: Context?) :
         values.put(PersonDbTableData.COL_EMAIL, person.emailId)
         values.put(PersonDbTableData.COL_PHONE, person.phoneNo)
         values.put(PersonDbTableData.COL_ADDRESS, person.address)
+        values.put(PersonDbTableData.COL_LATITUDE, person.latitude)
+        values.put(PersonDbTableData.COL_LONGITUDE, person.longitude)
         return values
     }
 
@@ -47,7 +49,9 @@ class DatabaseHelper(context: Context?) :
             cursor.getString(cursor.getColumnIndexOrThrow(PersonDbTableData.COL_NAME)),
             cursor.getString(cursor.getColumnIndexOrThrow(PersonDbTableData.COL_EMAIL)),
             cursor.getString(cursor.getColumnIndexOrThrow(PersonDbTableData.COL_PHONE)),
-            cursor.getString(cursor.getColumnIndexOrThrow(PersonDbTableData.COL_ADDRESS))
+            cursor.getString(cursor.getColumnIndexOrThrow(PersonDbTableData.COL_ADDRESS)),
+            cursor.getDouble(cursor.getColumnIndexOrThrow(PersonDbTableData.COL_LATITUDE)),
+            cursor.getDouble(cursor.getColumnIndexOrThrow(PersonDbTableData.COL_LONGITUDE))
         )
     }
 

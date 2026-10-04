@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Dark Theme Colors matching Image 1 -->
+    <color name="screen_background">#131419</color>
+    <color name="card_background">#2C303B</color>
+    <color name="text_primary">#E8EAED</color>
+    <color name="text_secondary">#9AA0A6</color>
+    <color name="avatar_background">#555964</color>
+    <color name="delete_button_bg">#FC1E61</color>
+    <color name="fab_background">#0D6EFD</color>
+    <color name="fab_icon_tint">#FFFFFF</color>
+</resources>

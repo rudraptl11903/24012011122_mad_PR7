@@ -33,7 +33,11 @@ class MainActivity : AppCompatActivity() {
 
         binding.fabRefresh.setOnClickListener { fetchPersons() }
 
-        if (db.personsCount == 0) fetchPersons() else showPersons()
+        if (db.personsCount == 0) {
+            fetchPersons()
+        } else {
+            showPersons()
+        }
     }
 
     private fun showPersons() {
@@ -52,9 +56,10 @@ class MainActivity : AppCompatActivity() {
             }
             withContext(Dispatchers.Main) {
                 if (list == null) {
-                    Toast.makeText(this@MainActivity, "Failed to load data", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@MainActivity, "Failed to load data from API", Toast.LENGTH_SHORT).show()
                 } else {
                     showPersons()
+                    Toast.makeText(this@MainActivity, "Retrieved ${list.size} contacts from API", Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -67,13 +72,19 @@ class MainActivity : AppCompatActivity() {
             for (i in 0 until array.length()) {
                 val obj = array.getJSONObject(i)
                 val profile = obj.getJSONObject("profile")
+                val location = profile.optJSONObject("location")
+                val lat = location?.optDouble("lat") ?: 0.0
+                val long = location?.optDouble("long") ?: 0.0
+
                 list.add(
                     Person(
                         obj.getString("id"),
                         profile.getString("name"),
                         obj.getString("email"),
                         obj.getString("phone").replace("}", "").trim(),
-                        profile.getString("address")
+                        profile.getString("address"),
+                        lat,
+                        long
                     )
                 )
             }
